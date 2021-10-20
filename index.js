@@ -13,6 +13,7 @@
     app.use(bodyParser.json())
 
 const Post = require('./models/Post')
+
 //=========================================================================
 //config
     //template egine
@@ -28,7 +29,13 @@ const Post = require('./models/Post')
     })
     //rota de redirecionamento
     app.get('/' , (req,res)=>{
-        res.render('home')
+        //chamando todos os modos do db
+        Post.findAll({order:[['id', 'desc']]}).then((posts) => {
+            res.render('home', {posts: posts})
+            //caso queira alterar a ordem coloque dentro de findAll o seguinte:
+            //{order: [['id', 'desc' ou 'asc']]}
+            //desk e de  decrcente ou seja a ordem do mais novo para o mais antigo
+        })
     })
 
 //rota de recebimento(como no dormulario o metodo de envio esta como post
@@ -47,6 +54,15 @@ const Post = require('./models/Post')
         })
     })
 
+    //deletando posts do banco de dados e da pagina home
+    app.get('/deletar/:id', (req,res)=>{
+        Post.destroy({where: {'id': req.params.id}}).then(() => {
+            //aqui apos apagado vai redirecionar para a pagina home
+            res.redirect('/')
+        }).catch((erro) => {
+            res.send('essa postagem nao existe' + erro)
+        })
+    })
 
 
 app.listen('8081', ()=>{
